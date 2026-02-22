@@ -74,5 +74,25 @@ public class Main {
     }
 
     public static void eliminarTarea(ArrayList<String> lista, Scanner sc) {
+        if (lista.isEmpty()) {
+            System.out.println("No hay tareas para eliminar.");
+            return;
+        }
+
+        listarTareas(lista);
+        System.out.print("Ingrese el número de la tarea que desea eliminar: ");
+        
+        try {
+            int indice = Integer.parseInt(sc.nextLine()) - 1;
+
+            if (indice >= 0 && indice < lista.size()) {
+                String eliminada = lista.remove(indice);
+                System.out.println("Tarea '" + eliminada + "' eliminada correctamente.");
+            } else {
+                System.out.println("Error: El número de tarea no existe.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Debe ingresar un número.");
+        }
     }
 }
