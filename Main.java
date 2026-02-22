@@ -90,6 +90,32 @@ public class Main {
     }
 
     public static void marcarCompletada(ArrayList<Tarea> lista, Scanner sc) {
+        listarTareas(lista);
+        System.out.print("Ingrese el número de la tarea que desea marcar como Completada: ");
+        
+        try {
+            int indice = Integer.parseInt(sc.nextLine()) - 1;
+
+            if (indice >= 0 && indice < lista.size()) {
+                Tarea tareaPorActualizar = lista.get(indice);
+                
+                tareaPorActualizar.setEstado(Estado.COMPLETADA);
+
+                System.out.println("Tarea '" + tareaPorActualizar.getNombre() + "' actualizada correctamente.");
+
+                FileOutputStream file = new FileOutputStream("tareas.dat");
+                ObjectOutputStream outputStream = new ObjectOutputStream(file);
+
+                outputStream.writeObject(lista);
+                
+                file.close();
+                outputStream.close();
+            } else {
+                System.out.println("Error: El número de tarea no existe.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void eliminarTarea(ArrayList<Tarea> lista, Scanner sc) {
