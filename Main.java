@@ -1,12 +1,14 @@
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.*;
 
 public class Main {
     public static void main(String[] args) {
-        ArrayList<String> tareas = new ArrayList<>();
+        ArrayList<Tarea> tareas = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
         int opcion = 0;
 
+        cargarTareasDesdeArchivo(tareas);
         System.out.println("--- GESTOR DE TAREAS PENDIENTES ---");
 
         while (opcion != 5) {
@@ -52,28 +54,45 @@ public class Main {
         System.out.print("Seleccione una opción: ");
     }
 
-    public static void agregarTarea(ArrayList<String> lista, Scanner sc) {
+    public static void agregarTarea(ArrayList<Tarea> lista, Scanner sc) {
         System.out.print("Escriba la descripción de la tarea: ");
         String nuevaTarea = sc.nextLine();
-        lista.add(nuevaTarea);
+        
+        try {
+            FileOutputStream file = new FileOutputStream("tareas.dat");
+            ObjectOutputStream outputStream = new ObjectOutputStream(file);
+
+            Tarea tarea = new Tarea(nuevaTarea);
+            lista.add(tarea);
+
+            outputStream.writeObject(lista);
+            
+            file.close();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("¡Tarea agregada con éxito!");
     }
 
-    public static void listarTareas(ArrayList<String> lista) {
+    public static void listarTareas(ArrayList<Tarea> lista) {
         System.out.println("\n--- LISTA DE TAREAS ---");
-        if (lista.isEmpty()) {
-            System.out.println("No hay tareas pendientes.");
-        } else {
+
+        try {
             for (int i = 0; i < lista.size(); i++) {
-                System.out.println((i + 1) + ". " + lista.get(i));
+                Tarea tarea = lista.get(i);
+                System.out.println((i + 1) + ". " + tarea.getNombre() + " - Estado: " + tarea.getEstado());
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public static void marcarCompletada(ArrayList<String> lista, Scanner sc) {
+    public static void marcarCompletada(ArrayList<Tarea> lista, Scanner sc) {
     }
 
-    public static void eliminarTarea(ArrayList<String> lista, Scanner sc) {
+    public static void eliminarTarea(ArrayList<Tarea> lista, Scanner sc) {
         if (lista.isEmpty()) {
             System.out.println("No hay tareas para eliminar.");
             return;
@@ -86,13 +105,41 @@ public class Main {
             int indice = Integer.parseInt(sc.nextLine()) - 1;
 
             if (indice >= 0 && indice < lista.size()) {
-                String eliminada = lista.remove(indice);
-                System.out.println("Tarea '" + eliminada + "' eliminada correctamente.");
+                Tarea eliminada = lista.remove(indice);
+                System.out.println("Tarea '" + eliminada.getNombre() + "' eliminada correctamente.");
+
+                FileOutputStream file = new FileOutputStream("tareas.dat");
+                ObjectOutputStream outputStream = new ObjectOutputStream(file);
+
+                outputStream.writeObject(lista);
+                
+                file.close();
+                outputStream.close();
+                
             } else {
                 System.out.println("Error: El número de tarea no existe.");
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Error: Debe ingresar un número.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cargarTareasDesdeArchivo(ArrayList<Tarea> lista) {
+        try {
+            FileInputStream file = new FileInputStream("tareas.dat");
+            ObjectInputStream inputStream = new ObjectInputStream(file);
+
+            ArrayList<Tarea> tareas = (ArrayList<Tarea>) inputStream.readObject();
+
+            System.out.println("Cargando tareas desde el archivo..." + tareas.size() + " tareas");
+
+            lista.addAll(tareas);
+
+            file.close();
+            inputStream.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
